@@ -10,11 +10,17 @@ class node
 	private:
 		node* next;
 		value* data;
-	public:
 		mutable std::mutex m;
+	public:
+		
 		node(node *new_next, value *new_data);
+		node();
 		node* get_next();
-		value* get_data();
+		value* get_value();
+		void lock();
+		void unlock();
+		void set_value(value *new_data);
+		void set_next(node *next);
 		~node();
 };
 
@@ -22,13 +28,16 @@ class list
 {
 	private:
 		node* head;
-		std::condition_variable cond;
+
 		
 	public:
 		mutable std::mutex m;
 		list(node* new_node);
 		list();
 		node* get_head();
+		bool check_key(int key);
+		std::vector<char*>* delete_key(int key);
+		void push(int new_key, value *new_value);
 		void set_head(node* new_head);
 		~list();
 		

@@ -11,27 +11,87 @@
 
 typedef std::chrono::high_resolution_clock Clock;
 
-//using namespace std;
 
-TEST(TestHashTable, Test1)
+TEST(TestHashTable, TestAddRandoms)
 {
-	int n = 2;
+	int n = 5;
 	std::thread threads[n];
 	int prime = 100;
 	threadsafe_hashtable *ht = new threadsafe_hashtable(prime);
 	for (int i = 0; i < n; i++)
 	{
-		//char* new_str = nullptr;
-		//value *v = new value(new_str, rand()% 20000);
 		threads[i] = std::thread(&threadsafe_hashtable::add_many_randoms, &(*ht));
 	}
 	
 	for (int i = 0; i < n; i++)
 		threads[i].join();
 	std::cout << *ht << std::endl;
+	//ht -> delete_key(261);
+	//ht -> delete_key(174);
+	//std::cout << *ht << std::endl;
+	//ht -> delete_key(74);
+	//ht -> delete_key(79);
+	//std::cout << *ht << std::endl;
 	delete ht;
-	ASSERT_TRUE(true);
 }
+
+TEST(TestHashTable, TestAddThousand)
+{
+	int n = 5;
+	std::thread threads[n];
+	int prime = 199;
+	threadsafe_hashtable *ht = new threadsafe_hashtable(prime);
+	std::vector<std::vector<int>> a(n);
+	for (int i = 0; i < 1000; i++)
+	{
+		a[i % n].push_back(i);
+	}
+	for (int i = 0; i < n; i++)
+	{
+		threads[i] = std::thread(&threadsafe_hashtable::add_many, &(*ht), cref(a[i]));
+	}
+	
+	for (int i = 0; i < n; i++)
+		threads[i].join();
+		
+	std::cout << *ht << std::endl;
+	delete ht;
+}
+
+TEST(TestHashTable, DeleteRandoms)
+{
+	int n = 5;
+	std::thread threads[n];
+	int prime = 200;
+	threadsafe_hashtable *ht = new threadsafe_hashtable(prime);
+	std::vector<std::vector<int>> a(n);
+	for (int i = 0; i < 1000; i++)
+	{
+		a[i % n].push_back(i);
+	}
+	for (int i = 0; i < n; i++)
+	{
+		threads[i] = std::thread(&threadsafe_hashtable::add_many, &(*ht), cref(a[i]));
+	}
+	
+	for (int i = 0; i < n; i++)
+		threads[i].join();
+		
+	std::cout << *ht << std::endl;
+	
+	for (int i = 0; i < n; i++)
+	{
+		threads[i] = std::thread(&threadsafe_hashtable::delete_many_randoms, &(*ht));
+	}
+	
+	for (int i = 0; i < n; i++)
+		threads[i].join();
+		
+	std::cout << *ht << std::endl;
+	delete ht;
+}
+
+
 
 int main(int argc, char **argv)
 {

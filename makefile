@@ -1,6 +1,6 @@
 CXX       = g++
 CXXFLAGS  = --std=c++17 
-LIBS      = -lgtest -lpthread 
+LIBS      = -g -lgtest -lpthread 
 SRCS      = $(wildcard *.cpp) 
 OBJS      = $(filter %.o,$(SRCS:.cpp=.o) $(SRCS:.cc=.o))
 

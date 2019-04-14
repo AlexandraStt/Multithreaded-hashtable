@@ -4,7 +4,6 @@
 #include <memory>
 #include <mutex>
 #include <condition_variable>
-
 #include "hashtable.h"
 
 int threadsafe_hashtable::get_hash(int key)
@@ -22,74 +21,58 @@ threadsafe_hashtable::threadsafe_hashtable(int new_prime)
 }
 
 void threadsafe_hashtable::add(int new_key, value *new_value)
-{
-	
+{	
 	int hash = get_hash(new_key);
-	//std::cout << new_key << " " << hash << std::endl << std::endl;
 	
-	while (true)
-	{
-		if(!this -> hashes[hash] -> get_head())
-		{
-			//std::cout << "111" << std::endl;
-			if ((this -> hashes[hash] -> m).try_lock())
-			{
-				//std::cout << "111" << std::endl;
-				node *new_node = new node(this -> hashes[hash] -> get_head(), new_value);
- 				this -> hashes[hash] -> set_head(new_node);
- 				(this -> hashes[hash] -> m).unlock();
- 				//std::cout << *this;	
-				break;
-				
-			}
-		}
-		else
-		{
-			if ((this -> hashes[hash] -> get_head() ->  m).try_lock())
-			{
-				//std::cout << "222" << std::endl;
-				//std::lock_guard<std::mutex> lg(this -> hashes[hash] -> get_head() -> m);
-				//(this -> hashes[hash] -> get_head() -> m).lock();
-				node *new_node = new node(this -> hashes[hash] -> get_head(), new_value);
-				new_node -> m.lock();
-				
-		 		this -> hashes[hash] -> set_head(new_node);
-		 		//после этой команды может другой оператор начать выполнять цикл
-		 		(new_node -> get_next() ->  m).unlock();
-		 		new_node -> m.unlock();
-		 		//std::cout << *this;	
-		 		break;
-		 	}
-		}
-		
-			
-	}
-	//std::cout << *this;		
-	
-	/*
-	if (!this -> hashes[hash])
-	{
-		std::lock_guard<std::mutex> lg(this -> hashes[hash] -> get_head() -> get_mutex());
-		node *new_node = new node(this -> hashes[hash] -> get_head(), new_value);
- 		this -> hashes[hash] -> set_head(new_node);
-	}
-	else
-	{
-		
-		list *new_list = new list(new node(nullptr, new_value));
-		this -> hashes[hash] = new_list;
-	}
-	*/	
+	this -> hashes[hash] -> push(new_key, new_value);
 }
+
+//returns list holding the key or nullptr
+bool threadsafe_hashtable::check_key(int key)
+{
+	int hash = get_hash(key);
+	return this -> hashes[hash] -> check_key(key);
+	
+}
+
+std::vector<char*>* threadsafe_hashtable::delete_key(int key)
+{
+	std::vector<char*> ans;
+	int hash = get_hash(key);	
+	//if (this -> check_key(key))
+		return this -> hashes[hash] -> delete_key(key);
+	//else
+		//return ans;
+} 
 
 void threadsafe_hashtable::add_many_randoms()
 {
 	for (int i = 0; i < 100; i++)
 	{
+		//char* new_str = new char[2];
+		//new_str[0] = char(rand() % 23 + 48);
 		char* new_str = nullptr;
-		value *v = new value(new_str, i);
+		//new_str[1] = '\0';
+		value *v = new value(new_str, rand() % 20000);
 		this -> add(v -> get_int(), v);
 	}
+}
+
+
+void threadsafe_hashtable::add_many(std::vector<int> const &a)
+{
+	 for (int i = 0; i < a.size(); i++)
+	 {
+	 	add(a[i], new value(nullptr, a[i]));
+	 }
+}
+
+void threadsafe_hashtable::delete_many_randoms()
+{
+	 for (int i = 0; i < 100; i++)
+	 {
+	 	this -> delete_key(rand() % 1000);
+	 }
 }
 
 threadsafe_hashtable::~threadsafe_hashtable()
@@ -104,14 +87,14 @@ std::ostream& operator<<(std::ostream& os, const threadsafe_hashtable& ht)
 {
 	for (int i = 0; i < ht.prime; i++)
 	{
-		os << i << ": " << std::endl;
-		if (ht.hashes[i] -> get_head())
+		os << i << ": ";
+		if (ht.hashes[i] -> get_head() -> get_next())
 		{
-			node *nd = ht.hashes[i] -> get_head();
+			node *nd = ht.hashes[i] -> get_head() -> get_next();
 			while (nd)
 			{
-				os << nd -> get_data() -> get_int() << " ";
-				//os << nd -> get_data() -> get_str() << " " << std::endl;
+				os << nd -> get_value() -> get_int() << " ";
+				//os << nd -> get_value() -> get_str() << " ;";
 				nd = nd -> get_next();
 			}
 			std::cout << std::endl;

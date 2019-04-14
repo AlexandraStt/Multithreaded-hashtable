@@ -13,8 +13,12 @@ class threadsafe_hashtable
 		int get_hash(int key);
 	public:
 		threadsafe_hashtable(int prime_int);
+		bool check_key(int key);
+		std::vector<char*>* delete_key(int key);
 		void add(int new_key, value *new_value);
 		void add_many_randoms();
+		void add_many(std::vector<int> const &a);
+		void delete_many_randoms();
 		~threadsafe_hashtable();
 		
 		friend std::ostream& operator<<(std::ostream& os, const threadsafe_hashtable& v);
