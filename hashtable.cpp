@@ -27,7 +27,7 @@ void threadsafe_hashtable::add(int new_key, value *new_value)
 	this -> hashes[hash] -> push(new_key, new_value);
 }
 
-//returns list holding the key or nullptr
+
 bool threadsafe_hashtable::check_key(int key)
 {
 	int hash = get_hash(key);
@@ -73,6 +73,28 @@ void threadsafe_hashtable::delete_many_randoms()
 	 {
 	 	this -> delete_key(rand() % 1000);
 	 }
+}
+
+
+void threadsafe_hashtable::check_random_keys()
+{
+	std::freopen("check_keys.txt", "a", stdout);
+		
+	for (int i = 0; i < 100; i++)
+	{
+		int for_check = rand() % 20000;
+		if (this -> check_key(for_check))
+		{
+			std::printf("%d%s\n", for_check, " - yes");
+		}
+		else
+		{
+			std::printf("%d%s\n", for_check, " - no");
+		}
+	}	
+	
+	std::fclose(stdout);
+		
 }
 
 threadsafe_hashtable::~threadsafe_hashtable()

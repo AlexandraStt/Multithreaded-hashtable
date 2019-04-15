@@ -92,6 +92,38 @@ TEST(TestHashTable, DeleteRandoms)
 }
 
 
+TEST(TestHashTable, TestCheckRandoms)
+{
+	int n = 4;
+	std::thread threads[n];
+	int prime = 100;
+	threadsafe_hashtable *ht = new threadsafe_hashtable(prime);
+	
+	for (int i = 0; i < n; i++)
+	{
+		threads[i] = std::thread(&threadsafe_hashtable::add_many_randoms, &(*ht));
+	}
+	
+	for (int i = 0; i < n; i++)
+		threads[i].join();
+		
+	std::cout << *ht << std::endl;
+	
+	for (int i = 0; i < n; i++)
+	{
+		threads[i] = std::thread(&threadsafe_hashtable::check_random_keys, &(*ht));
+	}
+	
+	for (int i = 0; i < n; i++)
+		threads[i].join();
+	
+	delete ht;
+}
+
+
+
+
+
 
 int main(int argc, char **argv)
 {

@@ -19,6 +19,7 @@ class threadsafe_hashtable
 		void add_many_randoms();
 		void add_many(std::vector<int> const &a);
 		void delete_many_randoms();
+		void check_random_keys();
 		~threadsafe_hashtable();
 		
 		friend std::ostream& operator<<(std::ostream& os, const threadsafe_hashtable& v);
