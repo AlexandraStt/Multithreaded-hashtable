@@ -52,10 +52,9 @@ bool list::check_key(int key)
 };
 
 
-std::vector<char*>* list::delete_key(int key)
+void list::delete_key(int key)
 {
-	std::vector<char*> ans;
-
+	//vector<char*> ans
 	node *prev, *curr;
 	prev = head;
 	prev -> lock();
@@ -65,13 +64,49 @@ std::vector<char*>* list::delete_key(int key)
 		curr -> lock();
 		if (curr -> get_value() -> get_int() == key)
 		{
-			ans.push_back(curr -> get_value() -> get_str());
+			//ans.push_back(curr -> get_value() -> get_str());
 			prev -> set_next(curr -> get_next());
 			node *for_delete = curr;
 			//curr -> get_next() -> lock();
 			curr = curr -> get_next();
 			for_delete -> unlock();
 			delete for_delete;
+			//ht -> m.lock();
+			//ht -> set_size(ht -> get_size() - 1);
+			//ht -> m.unlock();
+			continue;
+		}
+		prev -> unlock();
+		prev = curr;
+		curr = curr -> get_next();
+	}
+		
+	prev -> unlock();
+}
+
+
+void list::delete_and_get_key(int key, std::vector<char*>* ans)
+{
+	//vector<char*> ans
+	node *prev, *curr;
+	prev = head;
+	prev -> lock();
+	curr = head -> get_next();
+	while (curr)
+	{
+		curr -> lock();
+		if (curr -> get_value() -> get_int() == key)
+		{
+			ans -> push_back(curr -> get_value() -> get_str());
+			prev -> set_next(curr -> get_next());
+			node *for_delete = curr;
+			//curr -> get_next() -> lock();
+			curr = curr -> get_next();
+			for_delete -> unlock();
+			delete for_delete;
+			//ht -> m.lock();
+			//ht -> set_size(ht -> get_size() - 1);
+			//ht -> m.unlock();
 			continue;
 		}
 		prev -> unlock();
@@ -81,19 +116,13 @@ std::vector<char*>* list::delete_key(int key)
 		
 	prev -> unlock();
 	
-	if (ans.size() == 0)
-		return nullptr;
-	else
-		return &ans;
-	
+	if (ans -> size() == 0)
+		ans = nullptr;
 }
-
-
 
 
 void list::push(int key, value *new_value)
 {
-	//std::cout << key << std::endl;
 	node *new_nd = new node(nullptr, new_value);
 	//this -> head -> lock();
 	node *prev, *curr;

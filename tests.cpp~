@@ -9,9 +9,6 @@
 #include <chrono>
 #include <thread>
 
-typedef std::chrono::high_resolution_clock Clock;
-
-
 TEST(TestHashTable, TestAddRandoms)
 {
 	int n = 5;
@@ -25,13 +22,9 @@ TEST(TestHashTable, TestAddRandoms)
 	
 	for (int i = 0; i < n; i++)
 		threads[i].join();
+		
+	std::cout << ht -> size() << std::endl;
 	std::cout << *ht << std::endl;
-	//ht -> delete_key(261);
-	//ht -> delete_key(174);
-	//std::cout << *ht << std::endl;
-	//ht -> delete_key(74);
-	//ht -> delete_key(79);
-	//std::cout << *ht << std::endl;
 	delete ht;
 }
 
@@ -48,7 +41,7 @@ TEST(TestHashTable, TestAddThousand)
 	}
 	for (int i = 0; i < n; i++)
 	{
-		threads[i] = std::thread(&threadsafe_hashtable::add_many, &(*ht), cref(a[i]));
+		threads[i] = std::thread(&threadsafe_hashtable::add_vector, &(*ht), cref(a[i]));
 	}
 	
 	for (int i = 0; i < n; i++)
@@ -69,24 +62,60 @@ TEST(TestHashTable, DeleteRandoms)
 	{
 		a[i % n].push_back(i);
 	}
+	
+	
 	for (int i = 0; i < n; i++)
 	{
-		threads[i] = std::thread(&threadsafe_hashtable::add_many, &(*ht), cref(a[i]));
+		threads[i] = std::thread(&threadsafe_hashtable::add_vector, &(*ht), cref(a[i]));
 	}
 	
 	for (int i = 0; i < n; i++)
 		threads[i].join();
 		
+	std::cout << ht -> size() << std::endl;	
 	std::cout << *ht << std::endl;
 	
 	for (int i = 0; i < n; i++)
 	{
 		threads[i] = std::thread(&threadsafe_hashtable::delete_many_randoms, &(*ht));
 	}
-	
+	 
 	for (int i = 0; i < n; i++)
 		threads[i].join();
 		
+	std::cout << ht -> size() << std::endl;
+	std::cout << *ht << std::endl;
+	delete ht;
+}
+
+
+TEST(TestHashTable2, DeleteCertainKeys)
+{
+	int n = 5;
+	std::thread threads[n];
+	int prime = 200;
+	threadsafe_hashtable *ht = new threadsafe_hashtable(prime);
+	
+	std::vector<std::vector<int>> a(n);
+	for (int i = 0; i < 1000; i++)
+		a[i % n].push_back(i);
+	for (int i = 0; i < n; i++)
+		threads[i] = std::thread(&threadsafe_hashtable::add_vector, &(*ht), cref(a[i]));
+	for (int i = 0; i < n; i++)
+		threads[i].join();
+		
+	std::cout << ht -> size() << std::endl;	
+	std::cout << *ht << std::endl;
+	
+	std::vector<std::vector<int>> for_delete(n);
+	for (int i = 0; i < 500; i++)
+		for_delete[i % n].push_back(i);
+	for (int i = 0; i < n; i++)
+		threads[i] = std::thread(&threadsafe_hashtable::delete_vector, &(*ht), cref(for_delete[i])); 
+	for (int i = 0; i < n; i++)
+		threads[i].join();
+		
+	std::cout << ht -> size() << std::endl;
 	std::cout << *ht << std::endl;
 	delete ht;
 }
@@ -100,9 +129,7 @@ TEST(TestHashTable, TestCheckRandoms)
 	threadsafe_hashtable *ht = new threadsafe_hashtable(prime);
 	
 	for (int i = 0; i < n; i++)
-	{
 		threads[i] = std::thread(&threadsafe_hashtable::add_many_randoms, &(*ht));
-	}
 	
 	for (int i = 0; i < n; i++)
 		threads[i].join();
@@ -110,24 +137,20 @@ TEST(TestHashTable, TestCheckRandoms)
 	std::cout << *ht << std::endl;
 	
 	for (int i = 0; i < n; i++)
-	{
 		threads[i] = std::thread(&threadsafe_hashtable::check_random_keys, &(*ht));
-	}
 	
 	for (int i = 0; i < n; i++)
 		threads[i].join();
-	
+			
 	delete ht;
 }
 
 
-
-
-
-
 int main(int argc, char **argv)
 {
+	std::freopen("check_keys.txt", "w", stdout);
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
+	std::fclose(stdout);
 	
 }
